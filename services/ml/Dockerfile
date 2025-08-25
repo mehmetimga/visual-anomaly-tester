@@ -1,16 +1,21 @@
 FROM python:3.10-slim
 
-# System dependencies for OpenCV, ML, and GPU support
+# System dependencies for OpenCV, ML, and basic functionality
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx \
+    git \
+    wget \
+    curl \
+    build-essential \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# Try to install OpenCV dependencies, but don't fail if some are unavailable
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
-    libxrender-dev \
     libgomp1 \
-    libgcc-s1 \
-    git \
-    wget \
+    || true \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
