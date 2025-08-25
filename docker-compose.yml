@@ -19,18 +19,11 @@ services:
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - MODEL_REGISTRY=/app/models
-      - CUDA_VISIBLE_DEVICES=0
+      - CUDA_VISIBLE_DEVICES=""
     volumes:
       - ./data:/app/data
       - ./models:/app/models
       - ./training_data:/app/training_data
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
 
   qdrant:
     image: qdrant/qdrant:latest
