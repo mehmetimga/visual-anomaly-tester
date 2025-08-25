@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Testing Demo App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .timestamp {
+            color: #718096;
+            font-size: 0.9rem;
+            background: #f7fafc;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .metric {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin: 1rem 0;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status.active {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading animation */
+        .loading-dots {
+            display: inline-flex;
+            gap: 0.25rem;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: loading 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes loading {
+            0%, 80%, 100% { 
+                transform: scale(0);
+            } 40% { 
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🎯 Visual Testing Demo</h1>
+                <div class="timestamp" data-testid="current-time" id="timestamp">
+                    Loading...
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2>📊 Dashboard Metrics</h2>
+                <div class="metric" data-testid="visitor-count" id="visitorCount">
+                    0
+                </div>
+                <p>Total Visitors Today</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+                <span class="status active">Active</span>
+            </div>
+
+            <div class="card">
+                <h2>🚀 System Status</h2>
+                <p>All systems operational</p>
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <p style="margin-top: 1rem; color: #718096;">
+                    Last updated: <span id="lastUpdate">Just now</span>
+                </p>
+                <button class="button" onclick="refreshData()">
+                    Refresh Data
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>📈 Performance</h2>
+                <div class="metric" style="color: #48bb78;" id="responseTime">
+                    0ms
+                </div>
+                <p>Average Response Time</p>
+                <button class="button" onclick="simulateTest()">
+                    Run Test
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>👥 User Activity</h2>
+                <div class="metric" style="color: #ed8936;" id="activeUsers">
+                    0
+                </div>
+                <p>Active Users</p>
+                <div style="margin-top: 1rem;">
+                    <div class="user-avatar" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: inline-block; margin-right: 0.5rem;"></div>
+                    <div class="user-avatar" style="width: 40px; height: 40px; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 50%; display: inline-block; margin-right: 0.5rem;"></div>
+                    <div class="user-avatar" style="width: 40px; height: 40px; background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); border-radius: 50%; display: inline-block;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="notification" id="notification">
+        Visual test completed successfully! ✅
+    </div>
+
+    <script>
+        // Update timestamp every second
+        function updateTimestamp() {
+            const now = new Date();
+            const timestamp = now.toLocaleString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('timestamp').textContent = timestamp;
+        }
+
+        // Update visitor count with animation
+        function updateVisitorCount() {
+            const count = Math.floor(Math.random() * 1000) + 500;
+            const element = document.getElementById('visitorCount');
+            let current = parseInt(element.textContent) || 0;
+            
+            const increment = Math.ceil((count - current) / 20);
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= count) {
+                    current = count;
+                    clearInterval(timer);
+                }
+                element.textContent = current.toLocaleString();
+            }, 50);
+
+            // Update progress bar
+            const progress = Math.min((count / 2000) * 100, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        // Update response time
+        function updateResponseTime() {
+            const time = Math.floor(Math.random() * 50) + 10;
+            document.getElementById('responseTime').textContent = time + 'ms';
+        }
+
+        // Update active users
+        function updateActiveUsers() {
+            const users = Math.floor(Math.random() * 50) + 10;
+            document.getElementById('activeUsers').textContent = users;
+        }
+
+        // Refresh all data
+        function refreshData() {
+            updateVisitorCount();
+            updateResponseTime();
+            updateActiveUsers();
+            document.getElementById('lastUpdate').textContent = 'Just now';
+            
+            // Show notification
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Simulate visual test
+        function simulateTest() {
+            // Add some visual changes for testing
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.background = `linear-gradient(135deg, ${
+                        index % 2 === 0 ? '#f093fb 0%, #f5576c 100%' : '#4facfe 0%, #00f2fe 100%'
+                    })`;
+                    card.style.color = 'white';
+                    
+                    setTimeout(() => {
+                        card.style.background = 'white';
+                        card.style.color = '';
+                    }, 2000);
+                }, index * 200);
+            });
+        }
+
+        // Initialize
+        updateTimestamp();
+        updateVisitorCount();
+        updateResponseTime();
+        updateActiveUsers();
+
+        // Update timestamp every second
+        setInterval(updateTimestamp, 1000);
+
+        // Update metrics every 10 seconds
+        setInterval(() => {
+            updateVisitorCount();
+            updateResponseTime();
+            updateActiveUsers();
+        }, 10000);
+    </script>
+</body>
+</html>

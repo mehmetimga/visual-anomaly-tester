@@ -1,0 +1,64 @@
+version: "3.9"
+services:
+  api:
+    build: ./services/api
+    ports: ["8080:8080"]
+    environment:
+      - ML_URL=http://ml:8000
+      - QDRANT_URL=http://qdrant:6333
+      - MLFLOW_URL=http://mlflow:5000
+      - DATA_DIR=/app/data
+      - MODEL_REGISTRY=/app/models
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    depends_on: [ml, qdrant, mlflow]
+
+  ml:
+    build: ./services/ml
+    ports: ["8000:8000"]
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - MODEL_REGISTRY=/app/models
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./training_data:/app/training_data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports: ["6333:6333"]
+    volumes:
+      - ./qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+
+  mlflow:
+    image: python:3.10-slim
+    ports: ["5000:5000"]
+    volumes:
+      - ./mlflow_data:/mlflow
+    working_dir: /mlflow
+    command: >
+      bash -c "pip install mlflow boto3 pymysql && 
+               mlflow server --host 0.0.0.0 --port 5000 --default-artifact-root ./artifacts --backend-store-uri sqlite:///mlflow.db"
+
+  training:
+    build: ./services/training
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - QDRANT_URL=http://qdrant:6333
+    volumes:
+      - ./data:/app/data
+      - ./training_data:/app/training_data
+      - ./models:/app/models
+    depends_on: [qdrant, mlflow]
+    profiles: ["training"]

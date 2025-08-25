@@ -1,0 +1,39 @@
+{
+  "name": "visual-anomaly-ui-tests",
+  "version": "2.0.0",
+  "description": "Advanced UI visual testing with ML-powered anomaly detection",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ci": "playwright test --reporter=junit",
+    "test:parallel": "playwright test --workers=4",
+    "show-report": "playwright show-report",
+    "install-browsers": "npx playwright install --with-deps",
+    "update-baselines": "node scripts/update-baselines.js",
+    "analyze-diffs": "node scripts/analyze-diffs.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "form-data": "^4.0.0",
+    "playwright": "^1.55.0",
+    "sharp": "^0.33.0",
+    "winston": "^3.11.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "playwright",
+    "visual-testing",
+    "anomaly-detection",
+    "ui-testing",
+    "machine-learning"
+  ]
+}
