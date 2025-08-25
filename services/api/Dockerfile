@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM --platform=linux/arm64 node:20-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \

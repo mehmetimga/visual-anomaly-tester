@@ -1,6 +1,6 @@
-FROM python:3.10-slim
+FROM --platform=linux/arm64 python:3.10-slim
 
-# System dependencies for OpenCV, ML, and basic functionality
+# System dependencies for OpenCV, ML, and basic functionality on ARM64
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     wget \
@@ -9,14 +9,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Try to install OpenCV dependencies, but don't fail if some are unavailable
+# Essential OpenCV dependencies for ARM64/headless operation
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
-    libsm6 \
-    libxext6 \
     libgomp1 \
-    || true \
+    libgthread-2.0-0 \
     && rm -rf /var/lib/apt/lists/*
+
+# Set environment variables for headless operation
+ENV OPENCV_IO_ENABLE_JASPER=1
+ENV OPENCV_IO_ENABLE_OPENEXR=1
 
 WORKDIR /app
 
@@ -27,8 +29,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Download pre-trained models
-RUN python download_models.py
+# Download pre-trained models (simple mode)
+RUN python download_models_simple.py
 
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["uvicorn", "main_simple:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
